@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#100b1d">
+  <meta name="description" content="Эльмар и Ариадна: Мир любви — маленькое интерактивное приключение.">
+  <title>Эльмар и Ариадна: Мир любви</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=EB+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #e4c77b;
+      --gold-bright: #ffe8a3;
+      --cream: #fff8e8;
+      --muted: #c9c0d4;
+      --night: #100b1d;
+      --panel: rgba(20, 14, 34, .88);
+      --line: rgba(228, 199, 123, .42);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { min-height: 100%; background: var(--night); }
+    body {
+      margin: 0; min-height: 100vh; min-height: 100dvh; color: var(--cream);
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(87, 58, 126, .35), transparent 55%),
+        linear-gradient(145deg, #100b1d, #171024 55%, #090711);
+      font-family: 'EB Garamond', Georgia, serif;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .45;
+      background-image:
+        radial-gradient(1px 1px at 8% 17%, #fff 50%, transparent 100%),
+        radial-gradient(2px 2px at 81% 22%, var(--gold-bright) 50%, transparent 100%),
+        radial-gradient(1px 1px at 66% 73%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 21% 81%, var(--gold) 50%, transparent 100%),
+        radial-gradient(1px 1px at 93% 65%, #fff 50%, transparent 100%),
+        radial-gradient(1px 1px at 44% 39%, var(--gold) 50%, transparent 100%);
+      z-index: 0;
+    }
+    button { font: inherit; }
+    button:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 4px; }
+    .app { position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; display: flex; justify-content: center; align-items: center; padding: 22px 14px; }
+    .screen { display: none; width: min(100%, 850px); animation: appear .65s ease both; }
+    .screen.active { display: block; }
+    .frame {
+      position: relative; overflow: hidden; padding: clamp(22px, 5vw, 48px);
+      border: 1px solid var(--line); background: linear-gradient(145deg, rgba(27,20,44,.93), rgba(12,9,22,.94));
+      box-shadow: 0 22px 90px rgba(0,0,0,.4), inset 0 0 0 5px rgba(228,199,123,.035);
+    }
+    .frame::before, .frame::after { content: "✦"; position: absolute; color: var(--gold); opacity: .7; font-size: 18px; }
+    .frame::before { top: 12px; left: 15px; } .frame::after { right: 15px; bottom: 12px; }
+    .eyebrow { color: var(--gold); text-align: center; text-transform: uppercase; letter-spacing: .25em; font: 500 .7rem 'Cinzel', serif; }
+    h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 500; text-align: center; }
+    h1 { color: var(--gold-bright); font-size: clamp(2rem, 7vw, 4.2rem); line-height: 1.18; letter-spacing: .045em; margin: 15px 0 8px; text-shadow: 0 0 28px rgba(228,199,123,.16); }
+    h2 { color: var(--gold-bright); font-size: clamp(1.45rem, 4.5vw, 2.25rem); line-height: 1.3; margin: 10px 0 18px; }
+    p { line-height: 1.6; }
+    .intro { max-width: 600px; margin: 0 auto 20px; color: var(--muted); text-align: center; font-size: 1.2rem; }
+    .divider { display: flex; justify-content: center; align-items: center; gap: 12px; color: var(--gold); margin: 20px 0; }
+    .divider::before, .divider::after { content: ""; width: 65px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .divider::after { transform: rotate(180deg); }
+    .collage { display: grid; grid-template-columns: 1.2fr 1fr 1fr; grid-template-rows: 125px 125px; gap: 9px; margin: 22px 0 18px; }
+    .photo-slot { position: relative; overflow: hidden; border: 1px solid rgba(228,199,123,.5); background: linear-gradient(135deg, #352443, #17101f); }
+    .photo-slot:first-child { grid-row: span 2; }
+    .photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-slot .placeholder { position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; color: rgba(255,248,232,.65); text-align: center; font: .72rem 'Montserrat', sans-serif; line-height: 1.5; }
+    .media-help { margin: 0 auto; text-align: center; color: #a9a0b7; font: .7rem/1.6 'Montserrat', sans-serif; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px;
+      padding: 13px 23px; border: 1px solid var(--gold); color: var(--gold-bright);
+      background: rgba(228,199,123,.06); text-transform: uppercase; letter-spacing: .12em;
+      font: 500 .72rem 'Cinzel', serif; cursor: pointer; transition: .2s ease;
+    }
+    .btn:hover { color: #19111f; background: var(--gold); }
+    .btn:active { transform: scale(.98); }
+    .btn-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 25px; }
+    .btn.secondary { border-color: rgba(255,248,232,.25); color: var(--muted); background: transparent; }
+    .audio-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 15px 0 0; flex-wrap: wrap; }
+    .audio-row audio { width: min(100%, 300px); height: 34px; }
+    .audio-note { color: var(--muted); font: .68rem 'Montserrat', sans-serif; }
+    .progress-wrap { height: 4px; background: rgba(255,255,255,.1); margin: 0 0 24px; }
+    .progress { height: 100%; width: 12.5%; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); transition: width .35s ease; }
+    .question-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--gold); font: .68rem 'Montserrat', sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+    .question-text { max-width: 680px; margin: 22px auto 25px; text-align: center; font-size: clamp(1.35rem, 4.3vw, 2rem); line-height: 1.45; }
+    .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .answer {
+      min-height: 62px; padding: 14px 16px; text-align: left; cursor: pointer;
+      color: var(--cream); background: rgba(255,255,255,.035); border: 1px solid rgba(228,199,123,.25);
+      font: 1.05rem/1.35 'EB Garamond', serif; transition: .2s ease;
+    }
+    .answer:hover { border-color: var(--gold); background: rgba(228,199,123,.09); }
+    .answer.correct { border-color: #b7d69b; background: rgba(91,139,66,.2); }
+    .answer.wrong { border-color: #c77d82; background: rgba(151,48,59,.19); }
+    .answer:disabled { cursor: default; }
+    .editor-wrap { display: grid; gap: 16px; margin-top: 20px; }
+    .editor-card { border: 1px solid var(--line); padding: 16px; background: rgba(255,255,255,.025); }
+    .editor-card h3 { color: var(--gold); text-align: left; font-size: 1rem; margin: 0 0 12px; }
+    .editor-field { display: grid; gap: 6px; margin: 10px 0; color: var(--muted); font: .75rem 'Montserrat', sans-serif; }
+    .editor-field input, .editor-field textarea, .editor-field select { width: 100%; padding: 10px 12px; color: var(--cream); background: #171024; border: 1px solid rgba(228,199,123,.35); font: 1rem 'EB Garamond', serif; }
+    .editor-field textarea { min-height: 68px; resize: vertical; }
+    .editor-field select option { background: #171024; }
+    .editor-note { color: var(--muted); font: .75rem/1.6 'Montserrat', sans-serif; }
+    .feedback { min-height: 48px; margin: 16px 0 0; text-align: center; color: var(--gold-bright); font-size: 1.1rem; }
+    .feedback small { display: block; color: var(--muted); font: .75rem/1.5 'Montserrat', sans-serif; margin-top: 5px; }
+    .quiz-actions { display: flex; justify-content: center; margin-top: 12px; }
+    .quiz-actions .btn { display: none; }
+    .result-icon { text-align: center; font-size: 3rem; margin: 6px 0 15px; }
+    .result-copy { max-width: 590px; margin: 0 auto; text-align: center; font-size: 1.25rem; color: var(--muted); }
+    .invitation {
+      margin: 24px 0; padding: 22px 18px; text-align: center;
+      border: 1px solid var(--line); background: rgba(228,199,123,.055);
+    }
+    .invitation .big { color: var(--gold-bright); font: 500 clamp(1.3rem, 4vw, 1.9rem)/1.45 'Cinzel', serif; }
+    .invitation p { margin-bottom: 0; font-size: 1.2rem; }
+    .answer-final { display: none; margin-top: 18px; color: var(--gold-bright); text-align: center; font-size: 1.2rem; }
+    .answer-final.show { display: block; animation: appear .5s ease both; }
+    .tiny-footer { margin-top: 22px; color: rgba(201,192,212,.55); text-align: center; font: .62rem 'Montserrat', sans-serif; letter-spacing: .08em; }
+    @keyframes appear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 560px) {
+      .app { padding: 12px 10px; align-items: flex-start; }
+      .screen { margin: auto 0; }
+      .frame { padding: 25px 17px; }
+      .collage { grid-template-rows: 100px 100px; gap: 6px; }
+      .answers { grid-template-columns: 1fr; gap: 9px; }
+      .answer { min-height: 53px; }
+      .question-text { margin: 17px auto 20px; }
+      .intro { font-size: 1.05rem; }
+      .btn { width: 100%; }
+      .btn-row { gap: 9px; }
+    }
+    @media (max-height: 740px) {
+      .app { align-items: flex-start; }
+      .screen { margin: auto 0; }
+      .frame { padding-top: 22px; padding-bottom: 22px; }
+      .collage { grid-template-rows: 90px 90px; margin: 15px 0; }
+      .timer-spacer { margin: 10px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    КАК ДОБАВИТЬ СВОИ ФОТО И МУЗЫКУ:
+    1. Положи этот файл в репозиторий GitHub.
+    2. Рядом создай папку assets.
+    3. Добавь в assets фотографии: photo1.jpg, photo2.jpg, photo3.jpg,
+       а музыку — music.mp3.
+    4. Если названия файлов другие, поменяй их в PHOTO_FILES и AUDIO_FILE внизу.
+    Для GitHub Pages включи Settings → Pages → Deploy from a branch → main → /(root).
+  -->
+  <main class="app">
+    <section class="screen active" id="welcome-screen" aria-labelledby="main-title">
+      <div class="frame">
+        <div class="eyebrow">Одно маленькое волшебство</div>
+        <h1 id="main-title">Эльмар и Ариадна</h1>
+        <h2 style="margin-top:5px">Мир любви</h2>
+        <div class="divider"><span>✧ ❦ ✧</span></div>
+        <p class="intro">История двух сердец, немного магии и один очень важный вопрос в конце…</p>
+
+        <div class="collage" aria-label="Коллаж ваших фотографий">
+          <div class="photo-slot"><img data-photo="0" alt="Ваше совместное фото" hidden><div class="placeholder">Ваше главное фото<br>✦</div></div>
+          <div class="photo-slot"><img data-photo="1" alt="Ваше фото вместе" hidden><div class="placeholder">Воспоминание № 2</div></div>
+          <div class="photo-slot"><img data-photo="2" alt="Ещё одно ваше фото" hidden><div class="placeholder">Воспоминание № 3</div></div>
+        </div>
+                <div class="audio-row">
+          <span class="audio-note">♪ Музыка вашей истории</span>
+          <audio id="music" controls loop preload="none">
+            <source id="music-source" src="assets/music.mp3" type="audio/mpeg">
+            Ваш браузер не поддерживает аудио.
+          </audio>
+        </div>
+        <div class="btn-row">
+          <button class="btn" id="begin-btn">Начать приключение ✦</button>
+          <button class="btn secondary" id="edit-btn">Редактировать вопросы ⚙</button>
+        </div>
+        <div class="tiny-footer">ГЛАВА I · ТОЛЬКО ДЛЯ ДВОИХ</div>
+      </div>
+    </section>
+
+    <section class="screen" id="story-screen" aria-labelledby="story-title">
+      <div class="frame">
+        <div class="eyebrow">Письмо из школы волшебства</div>
+        <h2 id="story-title">Скоро начнётся игра…</h2>
+        <div class="divider"><span>✧</span></div>
+        <p class="intro">Ариадна, сегодня тебе предстоит пройти маленькое испытание на знание вашей истории.</p>
+        <p class="intro">Впереди <b id="question-total-intro" style="color:var(--gold-bright)">8 вопросов</b> о вас двоих. В каждом вопросе выбери один вариант ответа — правильный или не очень. Ошибаться можно: это ведь игра, а не экзамен!</p>
+        <p class="intro">А в самом конце тебя будет ждать кое-что особенное… 🪄</p>
+        <div class="btn-row">
+          <button class="btn" id="ready-btn">Я готова ✦</button>
+          <button class="btn secondary" id="back-home-btn">Вернуться в начало</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="quiz-screen" aria-labelledby="question-heading">
+      <div class="frame">
+        <div class="question-meta"><span id="chapter-label">Испытание I</span><span id="question-count">Вопрос 1 из 8</span></div>
+        <div class="progress-wrap" style="margin-top:12px"><div class="progress" id="progress"></div></div>
+        <h2 id="question-heading">Вопрос</h2>
+        <p class="question-text" id="question-text"></p>
+        <div class="answers" id="answers"></div>
+        <div class="feedback" id="feedback" aria-live="polite"></div>
+        <div class="quiz-actions"><button class="btn" id="next-btn">Следующий вопрос →</button></div>
+      </div>
+    </section>
+
+    <section class="screen" id="editor-screen" aria-labelledby="editor-title">
+      <div class="frame">
+        <div class="eyebrow">Настрой свою историю</div>
+        <h2 id="editor-title">Редактор викторины</h2>
+        <p class="editor-note">Меняй вопросы и варианты ответов, выбирай правильный ответ, добавляй или удаляй вопросы. Нажми «Сохранить» — изменения останутся в этом браузере на этом устройстве.</p>
+        <div id="editor-list" class="editor-wrap"></div>
+        <div class="btn-row">
+          <button class="btn secondary" id="add-question-btn">＋ Добавить вопрос</button>
+          <button class="btn" id="save-questions-btn">Сохранить изменения</button>
+          <button class="btn secondary" id="reset-questions-btn">Сбросить к исходным</button>
+          <button class="btn secondary" id="editor-back-btn">Назад</button>
+        </div>
+        <p class="editor-note" id="editor-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="screen" id="ending-screen" aria-labelledby="ending-title">
+      <div class="frame">
+        <div class="eyebrow">Последняя страница истории</div>
+        <div class="result-icon">🕯️ ✨</div>
+        <h2 id="ending-title">Главное испытание — впереди</h2>
+        <p class="result-copy" id="result-copy">Любовь — это не викторина и не количество правильных ответов. Это маленькие моменты, которые хочется создавать вместе.</p>
+        <div class="invitation">
+          <div class="big">Ариадна, пойдёшь со мной на вечернюю прогулку? ☕</div>
+          <p>Предлагаю прогуляться вечером, взять кофе в руки, поговорить обо всём на свете и просто побыть вдвоём.</p>
+        </div>
+        <p class="intro">Ну что, какое будет решение?</p>
+        <div class="btn-row" id="invite-buttons">
+          <button class="btn" id="yes-btn">Конечно, да ❤️</button>
+          <button class="btn secondary" id="think-btn">Мне нужно подумать</button>
+        </div>
+        <div class="answer-final" id="invite-response" aria-live="polite"></div>
+        <div class="btn-row"><button class="btn secondary" id="restart-btn">Пройти историю ещё раз ↺</button></div>
+        <div class="tiny-footer">С ТЕПЛОМ И НЕБОЛЬШОЙ ДОЛЕЙ МАГИИ · ЭЛЬМАР</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /*
+      ПЕРСОНАЛИЗАЦИЯ ВОПРОСОВ:
+      В массиве ниже можно менять вопросы и варианты ответов.
+      correct — номер правильного варианта, начиная с 0.
+      Подставь ваши реальные воспоминания, места и шутки.
+    */
+    const PHOTO_FILES = [
+      "assets/photo1.jpg",
+      "assets/photo2.jpg",
+      "assets/photo3.jpg"
+    ];
+    const AUDIO_FILE = "assets/music.mp3";
+
+    const questions = [
+      {
+        title: "Глава I · Начало истории",
+        question: "С какой даты началась наша особенная история?",
+        answers: ["12 декабря 2025 года", "В первый день весны", "Когда выпал первый снег", "В далёком волшебном королевстве"],
+        correct: 0,
+        right: "Верно! Именно с этой даты наша история стала особенной. ✨",
+        wrong: "Не совсем! Но даже у волшебников память иногда подводит."
+      },
+      {
+        title: "Глава II · Маленькие радости",
+        question: "Что лучше всего подходит для уютного вечера вдвоём?",
+        answers: ["Кофе и долгая прогулка", "Соревнование, кто быстрее уснёт", "Молчать по разным углам", "Обсудить все дела королевства"],
+        correct: 0,
+        right: "Вот это звучит как идеальный план для двоих. ☕",
+        wrong: "Хм… кажется, у нас есть повод устроить тот самый уютный вечер."
+      },
+      {
+        title: "Глава III · Магия воспоминаний",
+        question: "Что делает обычный день особенным?",
+        answers: ["Новая мантия волшебника", "Время, проведённое вместе", "Тысяча непрочитанных писем", "Случайный дождь из конфет"],
+        correct: 1,
+        right: "Да! Иногда самое большое волшебство — просто быть рядом. ❤️",
+        wrong: "Магия магией, а самые ценные моменты мы создаём сами."
+      },
+      {
+        title: "Глава IV · Секретный ингредиент",
+        question: "Что помогает нам лучше понимать друг друга?",
+        answers: ["Угадывать мысли без разговоров", "Всегда быть правыми", "Честность, забота и разговоры", "Спросить у совы"],
+        correct: 2,
+        right: "Точно. Забота и честность сильнее любого заклинания.",
+        wrong: "Подсказка: секрет не в заклинании, а в том, как мы слушаем друг друга."
+      },
+      {
+        title: "Глава V · Совместное приключение",
+        question: "Какой подарок может оказаться самым ценным?",
+        answers: ["Дорогая вещь", "Время и внимание друг к другу", "Сундук с золотом", "Десять одинаковых шарфов"],
+        correct: 1,
+        right: "Именно! Время и внимание — настоящая редкость. ✨",
+        wrong: "Вещи радуют, но совместные воспоминания остаются с нами надолго."
+      },
+      {
+        title: "Глава VI · Заклинание поддержки",
+        question: "Что стоит сделать, если у одного из нас тяжёлый день?",
+        answers: ["Сделать вид, что ничего не случилось", "Соревноваться, кому хуже", "Выслушать и поддержать", "Отправить дракона решать проблему"],
+        correct: 2,
+        right: "Да. Иногда нужно не решение, а человек, который рядом.",
+        wrong: "Лучшее заклинание в такой момент — внимание, поддержка и добрые слова."
+      },
+      {
+        title: "Глава VII · Карта будущего",
+        question: "Какое воспоминание нам стоит создать следующим?",
+        answers: ["Красивую прогулку и разговор по душам", "Очередь за волшебным зельем", "Серьёзный спор о драконах", "Сон на уроке прорицания"],
+        correct: 0,
+        right: "Кажется, у нас уже есть идея для следующей главы… ☕",
+        wrong: "Можно начать с чего-то простого и красивого — например, с прогулки."
+      },
+      {
+        title: "Глава VIII · Самое важное",
+        question: "Готова ли ты добавить в нашу историю ещё один тёплый вечер?",
+        answers: ["Да, давай устроим его!", "Только если кофе будет волшебным", "Мне нужно подумать", "Сначала спрошу у мудрой совы"],
+        correct: 0,
+        right: "Тогда осталось самое приятное — выбрать время и маршрут! ❤️",
+        wrong: "Любой ответ принимается. Главное — чтобы тебе было комфортно и хотелось этого самой."
+      }
+    ];
+
+    const DEFAULT_QUESTIONS = JSON.parse(JSON.stringify(questions));
+    try {
+      const savedQuestions = localStorage.getItem("elmarAriadnaQuizQuestions");
+      if (savedQuestions) {
+        const parsed = JSON.parse(savedQuestions);
+        if (Array.isArray(parsed) && parsed.length && parsed.every(q => q && typeof q.question === "string" && Array.isArray(q.answers) && q.answers.length >= 2 && Number.isInteger(q.correct) && q.correct >= 0 && q.correct < q.answers.length)) {
+          questions.splice(0, questions.length, ...parsed);
+        }
+      }
+    } catch (e) { console.warn("Не удалось загрузить сохранённые вопросы", e); }
+
+    const $ = (id) => document.getElementById(id);
+    const screens = ["welcome-screen", "story-screen", "quiz-screen", "ending-screen", "editor-screen"];
+    let currentQuestion = 0;
+    let score = 0;
+    let answered = false;
+
+    function showScreen(id) {
+      screens.forEach(screenId => $(screenId).classList.toggle("active", screenId === id));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function makeEditorField(labelText, value, className = "", tag = "input") {
+      const label = document.createElement("label");
+      label.className = "editor-field";
+      label.append(document.createTextNode(labelText));
+      const control = document.createElement(tag);
+      control.className = className;
+      control.value = value ?? "";
+      label.appendChild(control);
+      return { label, control };
+    }
+
+    function renderEditor() {
+      const totalIntro = $("question-total-intro");
+      if (totalIntro) totalIntro.textContent = `${questions.length} ${questions.length === 1 ? "вопрос" : (questions.length >= 2 && questions.length <= 4 ? "вопроса" : "вопросов")}`;
+      const list = $("editor-list");
+      list.replaceChildren();
+      questions.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "editor-card";
+        const heading = document.createElement("h3");
+        heading.textContent = `Вопрос ${index + 1}`;
+        card.appendChild(heading);
+        const title = makeEditorField("Название главы", item.title || "");
+        title.control.dataset.field = "title";
+        card.appendChild(title.label);
+        const question = makeEditorField("Текст вопроса", item.question, "", "textarea");
+        question.control.dataset.field = "question";
+        card.appendChild(question.label);
+        const answersWrap = document.createElement("div");
+        answersWrap.className = "editor-wrap";
+        answersWrap.style.gap = "8px";
+        item.answers.forEach((answer, answerIndex) => {
+          const field = makeEditorField(`Вариант ответа ${answerIndex + 1}`, answer);
+          field.control.dataset.answerIndex = answerIndex;
+          answersWrap.appendChild(field.label);
+        });
+        card.appendChild(answersWrap);
+        const correct = document.createElement("label");
+        correct.className = "editor-field";
+        correct.append(document.createTextNode("Правильный ответ"));
+        const select = document.createElement("select");
+        select.dataset.field = "correct";
+        item.answers.forEach((answer, answerIndex) => {
+          const option = document.createElement("option");
+          option.value = answerIndex;
+          option.textContent = `${answerIndex + 1}. ${answer}`;
+          select.appendChild(option);
+        });
+        select.value = item.correct;
+        correct.appendChild(select);
+        card.appendChild(correct);
+        const right = makeEditorField("Сообщение при правильном ответе", item.right || "");
+        right.control.dataset.field = "right";
+        card.appendChild(right.label);
+        const wrong = makeEditorField("Сообщение при неправильном ответе", item.wrong || "");
+        wrong.control.dataset.field = "wrong";
+        card.appendChild(wrong.label);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "btn secondary";
+        remove.textContent = "Удалить этот вопрос";
+        remove.addEventListener("click", () => {
+          if (questions.length <= 1) { $("editor-status").textContent = "В викторине должен остаться хотя бы один вопрос."; return; }
+          questions.splice(index, 1);
+          renderEditor();
+        });
+        card.appendChild(remove);
+        list.appendChild(card);
+      });
+    }
+
+    function collectEditorValues() {
+      const cards = [...$("editor-list").querySelectorAll(".editor-card")];
+      return cards.map((card, index) => {
+        const get = (field) => card.querySelector(`[data-field="${field}"]`)?.value?.trim() || "";
+        const answers = [...card.querySelectorAll("[data-answer-index]")].map(el => el.value.trim());
+        if (!get("question") || answers.some(a => !a)) throw new Error(`Заполни текст вопроса и все варианты в вопросе ${index + 1}.`);
+        const correct = Number(get("correct"));
+        return {
+          title: get("title") || `Глава ${index + 1}`,
+          question: get("question"), answers, correct,
+          right: get("right") || "Верно! ✨",
+          wrong: get("wrong") || "Не совсем, попробуем дальше!"
+        };
+      });
+    }
+
+    function setUpMedia() {
+      const music = $("music");
+      $("music-source").src = AUDIO_FILE;
+      music.load();
+
+      document.querySelectorAll("[data-photo]").forEach((img, index) => {
+        const placeholder = img.nextElementSibling;
+        img.src = PHOTO_FILES[index];
+        img.addEventListener("load", () => {
+          img.hidden = false;
+          if (placeholder) placeholder.hidden = true;
+        });
+        img.addEventListener("error", () => {
+          img.hidden = true;
+          if (placeholder) placeholder.hidden = false;
+        });
+      });
+    }
+
+    function startQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      renderQuestion();
+      showScreen("quiz-screen");
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const item = questions[currentQuestion];
+      $("chapter-label").textContent = item.title;
+      $("question-count").textContent = `Вопрос ${currentQuestion + 1} из ${questions.length}`;
+      $("progress").style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+      $("question-heading").textContent = "Выбери свой ответ";
+      $("question-text").textContent = item.question;
+      $("feedback").textContent = "";
+      $("next-btn").style.display = "none";
+      $("next-btn").textContent = currentQuestion === questions.length - 1 ? "К самому важному →" : "Следующий вопрос →";
+      const answers = $("answers");
+      answers.replaceChildren();
+
+      item.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "answer";
+        button.textContent = answer;
+        button.addEventListener("click", () => chooseAnswer(index));
+        answers.appendChild(button);
+      });
+    }
+
+    function chooseAnswer(index) {
+      if (answered) return;
+      answered = true;
+      const item = questions[currentQuestion];
+      const buttons = [...$("answers").querySelectorAll("button")];
+      buttons.forEach((button, i) => {
+        button.disabled = true;
+        if (i === item.correct) button.classList.add("correct");
+        if (i === index && i !== item.correct) button.classList.add("wrong");
+      });
+
+      if (index === item.correct) {
+        score++;
+        $("feedback").textContent = item.right;
+      } else {
+        $("feedback").textContent = item.wrong;
+      }
+      const small = document.createElement("small");
+      small.textContent = index === item.correct ? "Очко волшебства получено!" : "Ничего страшного — продолжаем приключение.";
+      $("feedback").appendChild(small);
+      $("next-btn").style.display = "inline-flex";
+    }
+
+    function finishQuiz() {
+      $("result-copy").textContent =
+        `Ты прошла все ${questions.length} испытаний и набрала ${score} из ${questions.length} очков. Но самое главное — не счёт, а все тёплые моменты, которые мы ещё можем создать вместе.`;
+      $("invite-response").classList.remove("show");
+      $("invite-response").textContent = "";
+      $("invite-buttons").style.display = "flex";
+      showScreen("ending-screen");
+    }
+
+    $("begin-btn").addEventListener("click", () => showScreen("story-screen"));
+    $("ready-btn").addEventListener("click", startQuiz);
+    $("back-home-btn").addEventListener("click", () => showScreen("welcome-screen"));
+    $("next-btn").addEventListener("click", () => {
+      if (!answered) return;
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    });
+
+    $("yes-btn").addEventListener("click", () => {
+      $("invite-response").textContent = "Ура! ❤️ Тогда давай выберем вечер, время и любимый кофе. Эта глава начинается с нас двоих.";
+      $("invite-response").classList.add("show");
+      $("invite-buttons").style.display = "none";
+    });
+    $("think-btn").addEventListener("click", () => {
+      $("invite-response").textContent = "Конечно, не торопись. ❤️ Мне важно, чтобы ты сама этого хотела. Если захочешь — приглашение остаётся в силе.";
+      $("invite-response").classList.add("show");
+      $("invite-buttons").style.display = "none";
+    });
+    $("restart-btn").addEventListener("click", () => {
+      $("invite-response").classList.remove("show");
+      showScreen("welcome-screen");
+    });
+
+    $("edit-btn").addEventListener("click", () => { renderEditor(); $("editor-status").textContent = ""; showScreen("editor-screen"); });
+    $("editor-back-btn").addEventListener("click", () => showScreen("welcome-screen"));
+    $("add-question-btn").addEventListener("click", () => {
+      questions.push({ title: `Глава ${questions.length + 1}`, question: "Напиши свой вопрос", answers: ["Вариант 1", "Вариант 2", "Вариант 3", "Вариант 4"], correct: 0, right: "Верно! ✨", wrong: "Не совсем! Попробуй ещё раз в следующий раз." });
+      renderEditor();
+      $("editor-status").textContent = "Новый вопрос добавлен. Не забудь сохранить изменения.";
+    });
+    $("save-questions-btn").addEventListener("click", () => {
+      try {
+        const updated = collectEditorValues();
+        questions.splice(0, questions.length, ...updated);
+        localStorage.setItem("elmarAriadnaQuizQuestions", JSON.stringify(questions));
+        $("editor-status").textContent = "Сохранено! Вопросы и правильные ответы обновлены в этом браузере. ✨";
+        renderEditor();
+      } catch (error) { $("editor-status").textContent = error.message; }
+    });
+    $("reset-questions-btn").addEventListener("click", () => {
+      if (!confirm("Вернуть исходные вопросы? Твои сохранённые изменения будут заменены.")) return;
+      questions.splice(0, questions.length, ...JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)));
+      localStorage.removeItem("elmarAriadnaQuizQuestions");
+      renderEditor();
+      $("editor-status").textContent = "Исходные вопросы восстановлены.";
+    });
+
+    setUpMedia();
+  </script>
+</body>
+</html>
